@@ -7,20 +7,26 @@ import { SCREENS } from "../../utils/Enums";
 import { noImgAvailable } from "../../utils/Tools";
 
 
-const RenderNews = observer(({ item }) => {
-    const navigation = useNavigation()
-    console.log("🚀 ~ file: RenderNews.tsx ~ line 10 ~ RenderNews ~ props", item)
-    const { author, content, description, publishedAt, source, url, urlToImage, title } = item
+export type itemProps = {
+    item: {
+        description?: string,
+        publishedAt?: string,
+        urlToImage?: string,
+        title?: string,
+    }
+}
 
-    // const { description, image, title } = item
+const RenderNews = observer(({ item }: itemProps) => {
+    const navigation = useNavigation()
+    const { description, publishedAt, urlToImage, title } = item
     return (
-        <View key={item.BARCODE} style={styles.container}>
+        <View key={title} style={styles.container}>
             <Text style={styles.title}>{title}</Text>
-            <Text style={styles.publishedAt}>{moment(item?.publishedAt).format("YYYY/MM/DD - HH:mm")}</Text>
+            <Text style={styles.publishedAt}>{moment(publishedAt).format("YYYY/MM/DD - HH:mm")}</Text>
 
             <Image source={{ uri: urlToImage || noImgAvailable }} style={styles.img} onError={() => console.log("----ERR ")} />
 
-            <Text style={styles.about}>{item?.description.slice(0, 80)}</Text>
+            <Text style={styles.about}>{description?.slice(0, 80)}</Text>
 
             <View style={styles.bottomContainer}>
                 <TouchableOpacity onPress={() => navigation.navigate(SCREENS.Details, item)} style={[styles.readMoreContainer,]}>

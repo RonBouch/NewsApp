@@ -4,7 +4,7 @@ import React from "react";
 import { Text, View, Image, StyleSheet } from "react-native";
 import { noImgAvailable } from "../../utils/Tools";
 
-const Details = observer(({ route }) => {
+const Details = observer(({ route }: any) => {
     const details = route?.params
 
     const { author, content, description, publishedAt, source, url, urlToImage, title } = details
@@ -26,7 +26,7 @@ const Details = observer(({ route }) => {
 })
 
 
-export default Details;
+export default (Details);
 
 
 const styles = StyleSheet.create({

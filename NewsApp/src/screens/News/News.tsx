@@ -1,22 +1,26 @@
 import { observer } from 'mobx-react';
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, ImageBackground, Image } from 'react-native';
+import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { MaterialIndicator } from 'react-native-indicators';
 import { RenderNews, Search } from '../../components';
 import { debounce } from "lodash";
 import { NewsStore } from '../../stores';
+import { categories, getNewsFromApi } from '../../utils/Tools';
+import ModalDropdown from 'react-native-modal-dropdown';
+import { Categories } from '../../utils/Enums';
 
-const News = observer(({ }) => {
+const News = observer(() => {
     const [searchValue, setSearchValue] = useState('');
+    const [isSelectedFilter, setSelectedFilter] = useState(Categories.general);
 
-    const getDataWithFilter = (e: []) => {
+    const getDataWithFilter = (e: string) => {
         NewsStore.setNewsWithFilter(e)
         NewsStore.setLoader(false)
     }
 
     const handleNewDataWithDebounce: any = useCallback(debounce(getDataWithFilter, 1000), []);
 
-    const handleChangeText = useCallback((e: any) => {
+    const handleChangeText = useCallback((e: string) => {
         setSearchValue(e)
         if (e.length > 2) {
             NewsStore.setLoader(true)
@@ -27,26 +31,49 @@ const News = observer(({ }) => {
         }
     }, [searchValue]);
 
+    const getDataByCategory = async (category: string) => {
+        NewsStore.setLoader(true)
+        getNewsFromApi(category);
+    }
+
     const onSearchClear = useCallback(() => {
         setSearchValue('')
         NewsStore.setNewsWithFilter()
     }, [searchValue]);
 
+    const RenderCategories = () => {
+        return (
+            <View style={styles.categoryCon}>
+                <Text style={[styles.categoryTxt]}>Choose category: </Text>
+                <ModalDropdown
+                    style={styles.dropdown_3}
+                    defaultIndex={0}
+                    defaultValue={isSelectedFilter}
+                    options={categories}
+                    dropdownTextStyle={styles.dropdown_3_dropdownTextStyle}
+                    textStyle={styles.dropdown_3_txtStyle}
+                    dropdownTextHighlightStyle={styles.dropdown_3_dropdownTextHighlightStyle}
+                    onSelect={(index: string, option: string) => {
+                        getDataByCategory(option);
+                        setSelectedFilter(option);
+                    }}
+                />
+            </View >
+        )
+    }
+
     return (
         <View style={styles.container}>
-            <ImageBackground style={{ position: 'absolute', opacity: 0.7, height: '100%', width: '100%', zIndex: -1 }} resizeMode='cover' source={{
-                uri: 'https://img.freepik.com/free-vector/hand-painted-watercolor-pastel-sky-background_23-2148902771.jpg?w=2000'
-            }} />
-            <View style={{ width: '100%', height: 150 }}>
 
+            <View style={styles.filterCon}>
                 <Search
-                    cover={searchValue}
+                    value={searchValue}
                     onChange={handleChangeText}
                     onSearchClear={onSearchClear}
                 />
-
+                <RenderCategories />
             </View>
-            {(!NewsStore.getLoader && NewsStore.getNews.length) ? <FlatList
+            {(!NewsStore.getLoader) ? <FlatList
                 data={NewsStore.getNews.slice()}
                 initialNumToRender={10}
                 renderItem={(({ item }) => <RenderNews item={item} />)}
@@ -58,11 +85,10 @@ const News = observer(({ }) => {
         </View>
     );
 });
-export default News;
+export default (News);
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'rgb(243,243,242)',
         flex: 1,
         marginVertical: 10,
     },
@@ -80,4 +106,47 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         marginTop: 30,
     },
+    btn: {
+        padding: 10,
+        backgroundColor: 'gray',
+    },
+    btnSelected: {
+        padding: 10,
+        backgroundColor: 'blue',
+    },
+
+    categoryCon: {
+        flexDirection: 'row',
+        alignSelf: 'flex-start',
+        marginLeft: 20,
+        alignItems: 'center',
+        marginTop: 20
+    },
+    dropdown_3: {
+        padding: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: 'gray',
+        width: 210,
+    },
+    dropdown_3_dropdownTextStyle: {
+        backgroundColor: '#000',
+        color: '#fff',
+        fontSize: 16,
+    },
+    dropdown_3_dropdownTextHighlightStyle: {
+        backgroundColor: '#fff',
+        color: '#000',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    dropdown_3_txtStyle: {
+        fontSize: 16,
+        fontWeight: 'bold'
+
+    },
+    categoryTxt: {
+        fontSize: 16,
+        color: 'black',
+    },
+    filterCon: { width: '100%', height: 120 },
 });

@@ -3,4 +3,12 @@ export const SCREENS = {
     Details: 'Details',
 }
 
-export const noImgAvailable = 'https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482930.jpg';
+export const Categories = {
+    business: 'business',
+    entertainment: 'entertainment',
+    general: 'general',
+    health: 'health',
+    science: 'science',
+    sports: 'sports',
+    technology: 'technology',
+}
